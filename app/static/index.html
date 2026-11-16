@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YR Tube</title>
+<style>
+:root{--bg:#fafafa;--fg:#161616;--card:#fff;--accent:#e11d48;--mut:#6b7280;--bd:#e5e7eb}
+@media(prefers-color-scheme:dark){:root{--bg:#0f0f10;--fg:#f3f4f6;--card:#1a1a1c;--mut:#9ca3af;--bd:#2a2a2e}}
+*{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+main{max-width:760px;margin:0 auto;padding:32px 16px}
+h1{margin:0 0 4px}h1 span{color:var(--accent)}p.s{color:var(--mut);margin:0 0 24px}
+form{display:flex;gap:8px}input{flex:1;padding:12px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--fg);font:inherit}
+button{padding:12px 20px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:inherit;cursor:pointer}
+button:disabled{opacity:.6}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-top:20px}
+img{max-width:100%;border-radius:8px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+td,th{padding:6px;border-bottom:1px solid var(--bd);text-align:left}a{color:var(--accent)}.err{color:var(--accent);margin-top:16px}
+footer{margin-top:40px;color:var(--mut);font-size:13px}
+</style></head><body><main>
+<h1>YR <span>Tube</span></h1><p class="s">Paste a video link to see its details and available formats.</p>
+<form id="f"><input id="u" type="url" placeholder="https://..." required><button id="b">Inspect</button></form>
+<div id="out"></div>
+<footer>Built by Youssef Rajeh. Powered by the yt-dlp engine. Use only with content you have the right to access.</footer>
+</main><script>
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const size=n=>n?(n/1048576).toFixed(1)+' MB':'-';
+$('f').onsubmit=async e=>{e.preventDefault();$('b').disabled=true;$('out').innerHTML='<p>Loading...</p>';
+try{const r=await fetch('/api/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:$('u').value})});
+const d=await r.json();if(!r.ok)throw new Error(d.error);
+const rows=d.formats.map(f=>`<tr><td>${esc(f.resolution||'audio')}</td><td>${esc(f.ext)}</td><td>${f.has_video?'video':''} ${f.has_audio?'audio':''}</td><td>${size(f.filesize)}</td><td><a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">Open</a></td></tr>`).join('');
+$('out').innerHTML=`<div class="card">${d.thumbnail?`<img src="${esc(d.thumbnail)}" alt="">`:''}<h2>${esc(d.title)}</h2><p>${esc(d.uploader||'')}</p><table><tr><th>Quality</th><th>Type</th><th>Streams</th><th>Size</th><th></th></tr>${rows}</table></div>`;
+}catch(x){$('out').innerHTML=`<p class="err">${esc(x.message)}</p>`}$('b').disabled=false};
+</script></body></html>

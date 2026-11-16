@@ -1,0 +1,9 @@
+flask>=3.0
+gunicorn>=22.0
+brotli
+certifi
+mutagen
+pycryptodomex
+requests>=2.32.2,<3
+urllib3>=2.0.2,<3
+websockets>=13.0
