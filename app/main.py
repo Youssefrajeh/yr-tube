@@ -39,6 +39,11 @@ def index():
     return send_from_directory(app.static_folder, 'index.html')
 
 
+@app.get('/favicon.ico')
+def favicon():
+    return '', 204
+
+
 @app.get('/health')
 def health():
     return {'status': 'ok'}
@@ -58,7 +63,11 @@ def info():
         with YoutubeDL(opts) as ydl:
             data = ydl.extract_info(url, download=False)
     except Exception as e:
-        return jsonify(error=str(e)[:300]), 422
+        msg = str(e)
+        if 'confirm you' in msg and 'bot' in msg:
+            msg = ('This site blocked the request because it came from a cloud server. '
+                   'YouTube does this to most hosting providers. Try a link from another site.')
+        return jsonify(error=msg[:300]), 422
     formats = [{
         'id': f.get('format_id'), 'ext': f.get('ext'),
         'resolution': f.get('resolution') or f.get('format_note'),
